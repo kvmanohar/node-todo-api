@@ -7,6 +7,8 @@ var { mongoose } = require("./db/mongoose");
 var { Todo } = require("./models/todo");
 var { User } = require("./models/user");
 
+const port = process.env.port || 3000;
+
 var app = express();
 
 //Middleware to convert the app req to JSON
@@ -58,8 +60,8 @@ app.get("/todo/:id", (req, res) => {
 		});
 });
 
-app.listen(3000, () => {
-	console.log("Started on port 3000");
+app.listen(port, () => {
+	console.log(`Started on port ${port}`);
 });
 
 module.exports = {
