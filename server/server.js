@@ -41,7 +41,7 @@ app.get("/todos", (req, res) => {
 	);
 });
 
-//GET Endpoint: /todos/1243452 ---> Get todo item by passing id
+//GET Endpoint: /todo/1243452 ---> Get todo item by passing id
 app.get("/todo/:id", (req, res) => {
 	var id = req.params.id;
 	if (!ObjectID.isValid(id)) {
@@ -60,6 +60,7 @@ app.get("/todo/:id", (req, res) => {
 		});
 });
 
+//DELET Endpoint: /todo/:id ---> Delete todo item by passing id
 app.delete("/todo/:id", (req, res) => {
 	var id = req.params.id;
 	if (!ObjectID.isValid(id)) {
