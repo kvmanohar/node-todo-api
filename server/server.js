@@ -5,6 +5,8 @@ const { ObjectID } = require("mongodb");
 
 //Local imports
 var { mongoose } = require("./db/mongoose");
+mongoose.set("useFindAndModify", false); // use this to remove the deprecation warning: findOneAndModify
+
 var { Todo } = require("./models/todo");
 var { User } = require("./models/user");
 
