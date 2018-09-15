@@ -25,10 +25,10 @@ app.post("/todos", (req, res) => {
 		text: req.body.text
 	});
 	todo.save().then(
-		doc => {
+		(doc) => {
 			res.send(doc);
 		},
-		err => {
+		(err) => {
 			res.status(400).send(err);
 		}
 	);
@@ -37,10 +37,10 @@ app.post("/todos", (req, res) => {
 //GET Endpoint: /todos
 app.get("/todos", (req, res) => {
 	Todo.find().then(
-		todos => {
+		(todos) => {
 			res.send({ todos });
 		},
-		e => {
+		(e) => {
 			res.status(400).send(e);
 		}
 	);
@@ -54,13 +54,13 @@ app.get("/todo/:id", (req, res) => {
 	}
 
 	Todo.findById(id)
-		.then(todo => {
+		.then((todo) => {
 			if (!todo) {
 				return res.status(404).send(null);
 			}
 			res.status(200).send({ todo });
 		})
-		.catch(e => {
+		.catch((e) => {
 			res.status(400).send();
 		});
 });
@@ -72,13 +72,13 @@ app.delete("/todo/:id", (req, res) => {
 		return res.status(404).send();
 	}
 	Todo.findOneAndDelete({ _id: id })
-		.then(todo => {
+		.then((todo) => {
 			if (!todo) {
 				return res.status(404).send();
 			}
 			res.status(200).send(todo);
 		})
-		.catch(e => {
+		.catch((e) => {
 			res.status(400).send(e);
 		});
 });
@@ -100,13 +100,13 @@ app.patch("/todo/:id", (req, res) => {
 	}
 
 	Todo.findByIdAndUpdate(id, { $set: body }, { new: true })
-		.then(todo => {
+		.then((todo) => {
 			if (!todo) {
 				return res.status(404).send();
 			}
 			res.status(200).send({ todo });
 		})
-		.catch(e => {
+		.catch((e) => {
 			res.status(400).send();
 		});
 });
@@ -118,10 +118,13 @@ app.post("/users", (req, res) => {
 
 	user
 		.save()
-		.then(user => {
-			res.send(user);
+		.then((user) => {
+			return user.generateAuthToken();
 		})
-		.catch(e => {
+		.then((token) => {
+			res.header("x-auth", token).send(user);
+		})
+		.catch((e) => {
 			res.status(400).send(e);
 		});
 });
