@@ -1,16 +1,18 @@
-require("./config/config.js");
+require('./config/config.js');
 
-const _ = require("lodash");
-const express = require("express");
-const bodyParser = require("body-parser");
-const { ObjectID } = require("mongodb");
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const { ObjectID } = require('mongodb');
 
 //Local imports
-var { mongoose } = require("./db/mongoose");
-mongoose.set("useFindAndModify", false); // use this to remove the deprecation warning: findOneAndModify
+var { mongoose } = require('./db/mongoose');
+var { authenticate } = require('./middleware/authenticate');
 
-var { Todo } = require("./models/todo");
-var { User } = require("./models/user");
+mongoose.set('useFindAndModify', false); // use this to remove the deprecation warning: findOneAndModify
+
+var { Todo } = require('./models/todo');
+var { User } = require('./models/user');
 
 const port = process.env.PORT || 3000;
 
@@ -20,7 +22,7 @@ var app = express();
 app.use(bodyParser.json());
 
 //POST Endpoint: /todos
-app.post("/todos", (req, res) => {
+app.post('/todos', (req, res) => {
 	var todo = new Todo({
 		text: req.body.text
 	});
@@ -35,7 +37,7 @@ app.post("/todos", (req, res) => {
 });
 
 //GET Endpoint: /todos
-app.get("/todos", (req, res) => {
+app.get('/todos', (req, res) => {
 	Todo.find().then(
 		(todos) => {
 			res.send({ todos });
@@ -47,7 +49,7 @@ app.get("/todos", (req, res) => {
 });
 
 //GET Endpoint: /todo/1243452 ---> Get todo item by passing id
-app.get("/todo/:id", (req, res) => {
+app.get('/todo/:id', (req, res) => {
 	var id = req.params.id;
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
@@ -66,7 +68,7 @@ app.get("/todo/:id", (req, res) => {
 });
 
 //DELET Endpoint: /todo/:id ---> Delete todo item by passing id
-app.delete("/todo/:id", (req, res) => {
+app.delete('/todo/:id', (req, res) => {
 	var id = req.params.id;
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
@@ -84,9 +86,9 @@ app.delete("/todo/:id", (req, res) => {
 });
 
 //Update Endpoint: /todo/:id ---> Update todo item by passing todo
-app.patch("/todo/:id", (req, res) => {
+app.patch('/todo/:id', (req, res) => {
 	var id = req.params.id;
-	var body = _.pick(req.body, ["text", "completed"]);
+	var body = _.pick(req.body, ['text', 'completed']);
 
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
@@ -112,8 +114,8 @@ app.patch("/todo/:id", (req, res) => {
 });
 
 //POST Endpoint: /users
-app.post("/users", (req, res) => {
-	var body = _.pick(req.body, ["email", "password"]);
+app.post('/users', (req, res) => {
+	var body = _.pick(req.body, ['email', 'password']);
 	var user = new User(body);
 
 	user
@@ -122,11 +124,15 @@ app.post("/users", (req, res) => {
 			return user.generateAuthToken();
 		})
 		.then((token) => {
-			res.header("x-auth", token).send(user);
+			res.header('x-auth', token).send(user);
 		})
 		.catch((e) => {
 			res.status(400).send(e);
 		});
+});
+
+app.get('/users/me', authenticate, (req, res) => {
+	res.send(req.user);
 });
 
 app.listen(port, () => {

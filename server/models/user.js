@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const jwt = require("jsonwebtoken");
-const _ = require("lodash");
+const mongoose = require('mongoose');
+const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
 //Create a Users model document with email validation//
 // {
@@ -21,7 +21,7 @@ var UserSchema = mongoose.Schema({
 		unique: true,
 		validate: {
 			validator: validator.isEmail,
-			message: "{VALUE} is not a valid email id"
+			message: '{VALUE} is not a valid email id'
 		}
 	},
 	password: {
@@ -45,9 +45,9 @@ var UserSchema = mongoose.Schema({
 
 UserSchema.methods.generateAuthToken = function() {
 	var user = this;
-	var access = "auth";
+	var access = 'auth';
 	var token = jwt
-		.sign({ _id: user._id.toHexString(), access: access }, "abc123")
+		.sign({ _id: user._id.toHexString(), access: access }, 'abc123')
 		.toString();
 	user.tokens.push({ access, token });
 	return user.save().then(() => {
@@ -55,14 +55,31 @@ UserSchema.methods.generateAuthToken = function() {
 	});
 };
 
+//model method
+UserSchema.statics.findByToken = function(token) {
+	var User = this;
+	var decoded;
+
+	try {
+		decoded = jwt.verify(token, 'abc123');
+	} catch (error) {
+		return Promise.reject();
+	}
+	return User.findOne({
+		_id: decoded._id,
+		'tokens.token': token,
+		'tokens.access': 'auth'
+	});
+};
+
 //Override the toJSON method
 UserSchema.methods.toJSON = function() {
 	var user = this;
 	var userObject = user.toObject();
-	return _.pick(userObject, ["_id", "email"]);
+	return _.pick(userObject, ['_id', 'email']);
 };
 
-var User = mongoose.model("user", UserSchema);
+var User = mongoose.model('user', UserSchema);
 module.exports = {
 	User
 };
